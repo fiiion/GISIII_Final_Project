@@ -152,144 +152,34 @@ plot(sdb_inc)
 ```
 
 
-## Constructing a Final Data Table
+## Constructing and Saving the final data
 
-We'll conclude with 2 separate tables, one for the index for 2015, one for the index for 2019.
+First I'll add a column identifying which city each census tract belongs to.
 
-```{r merging final dfs}
+```{r adding city identifier column}
 
-dem15 <- data.frame("GEOID" = dem15$GEOID, "pwhite" = dem15$pwhite)
-dem19 <- data.frame("GEOID" = dem19$GEOID, "pwhite" = dem19$pwhite)
+sdb_inc <- sdb_inc %>%
+  mutate(city_name = "sd")
 
-glimpse(pov15)
-fdf15 <- left_join(pov15, dem15, by = "GEOID") 
-fdf15 <- left_join(fdf15, incdf15, by = "GEOID")
-fdf15 <- left_join(fdf15, dfhval15, by = "GEOID")
+mplsb_inc <- mplsb_inc %>% mutate(city_name = "mpls")
 
-glimpse(fdf15)
-
-fdf19 <- left_join(pov19, dem19, by = "GEOID") 
-fdf19 <- left_join(fdf19, incdf19, by = "GEOID")
-fdf19 <- left_join(fdf19, dfhval19, by = "GEOID")
-
-glimpse(fdf19)
+chib_inc <- chib_inc %>% mutate(city_name = "chi")
 
 ```
+
+It's occurred to me that the previous step wasn't strictly necessary, as it would be rather a pain to join all the tables together, and not necessary. So I'll save them as-is.
+
 
 I need to do some final edits:
-```{r choosing final variables}
+```{r exporting data}
 
-ffdf15 <- data.frame("GEOID" = fdf15$GEOID, "pwhite" = fdf15$pwhite, "ppov" = fdf15$ppov, "medearn" = fdf15$medearn, "medHouse" = fdf15$medHouse)
+getwd()  # always check! 
 
-glimpse(ffdf15)
-
-ffdf19 <- data.frame("GEOID" = fdf19$GEOID, "pwhite" = fdf19$pwhite, "ppov" = fdf19$ppov, "medearn" = fdf19$medearn, "medHouse" = fdf19$medHouse)
-
-glimpse(ffdf19)
-
-```
-
-
-
-## writing the dfs
-
-I'm first going to make the folders in the directory that I want.
-
-```{r saving the census data}
-getwd()
-
-write_csv(ffdf15, "Census_Data_For_Index/2015/Cen2015.csv")
-write_csv(ffdf19, "Census_Data_For_Index/2019/Cen2019.csv")
-```
-
-
-# Making the Index:
-
-```{r summary (find missing values)}
-
-summary(ffdf15)
-
-```
-
-Ok, so we'll need to use na.rm = TRUE in some of our later operations. Let's ignore that for now.
-
-## Standardizing variables
-
-In order to combine variables into an index, we need to standardize them. We do this to get the variables onto the same scale. A common approach to standardizing a variable is to calculate its z-score. The z-score is a measure of distance from the mean, in this case the mean of all tracts in an area. So, after standardizing, the variables will have the same units, specifically units of standard deviations.
-
-```{r calculating z scores}
-
-ffdf15 %>%
-  mutate(pwhite = (pwhite-mean(pwhite, na.rm=TRUE))/sd(pwhite, na.rm=TRUE)) %>%
-  select(GEOID,pwhite) %>%
-  summarize(Mean = mean(pwhite, na.rm = TRUE), SD = sd(pwhite, na.rm = TRUE)) 
-
+st_write(sdb_inc, "city_income_data/sd/sd_inc.shp")
+st_write(mplsb_inc, "city_income_data/mpls/mpls_inc.shp")
+st_write(chib_inc, "city_income_data/chi/chi_inc.shp")
 
 
 ```
 
-```{r attempting to do this for all variables in the df}
 
-cen15.std <- ffdf15 %>%
-        mutate_at(~(scale(.) %>% as.vector(.)), .vars = vars(-c(GEOID)))
-
-summary(cen15.std)
-
-```
-
-It seems to have worked, although I didn't take out the NA values! Yay!
-
-Repeating for the 2019 data:
-
-```{r 2019 index data}
-
-cen19.std <- ffdf19 %>%
-        mutate_at(~(scale(.) %>% as.vector(.)), .vars = vars(-c(GEOID)))
-
-summary(cen19.std)
-
-```
-
-Moving forward, I'm just going to take the average of the variables. I'm going to focus on the census data for 2015 at the moment:
-
-```{r adding avg col}
-
-cen15.std <- cen15.std %>%
-  mutate(DepInd15 = (pwhite+ppov+medearn+medHouse)/4)
-
-glimpse(cen15.std)
-
-# oops i already lied
-cen19.std <- cen19.std %>%
-  mutate(DepInd19 = (pwhite+ppov+medearn+medHouse)/4)
-
-glimpse(cen19.std)
-```
-
-```{r selecting only index values}
-Idf15 <- data.frame("GEOID" = cen15.std$GEOID, "I15" = cen15.std$DepInd15)
-Idf19 <- data.frame("GEOID" = cen19.std$GEOID, "I19" = cen19.std$DepInd19)
-
-Idf <- left_join(Idf15, Idf19, by = "GEOID")
-
-print(Idf)
-
-```
-
-```{r putting in a change factor}
-
-Idf <- mutate(Idf, Ichange = I19 - I15)
-
-Idf <- data.frame("GEOID" = Idf$GEOID, "IDel" = Idf$Ichange)
-plot(Idf$IDel)
-
-```
-
-
-
-
-Writing the data as a csv file:
-
-```{r}
-write_csv(Idf, "Census_Data_For_Index/IndexVals.csv")
-```
