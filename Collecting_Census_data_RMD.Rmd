@@ -57,14 +57,6 @@ chi_income2019 <- get_acs(geography = "tract",
 
 glimpse(chi_income2019)
 
-char_income2019 <- get_acs(geography = "tract", 
-              year = 2019,
-              variables = c(med_earn = "S2001_C01_002E"),
-              state = "SC",
-              county = "Charleston",
-              survey = "acs5",
-              output = "wide",
-              geometry = TRUE)
 
 mpls_income2019 <- get_acs(geography = "tract", 
               year = 2019,
@@ -92,14 +84,14 @@ Now I need to pull in the city boundaries for each one:
 
 ```{r chicago boundaries}
 
-chibounds = st_read("final_project/Boundaries - City(2)/geo_export_3d084884-b126-4daa-b908-1286d52a1e19.shp")
+chibounds = st_read("city_boundaries/Chicago_boundaries/geo_export_3d084884-b126-4daa-b908-1286d52a1e19.shp")
 
 chibounds <- chibounds[0]
 plot(chibounds[0])
-plot(chi_income2019)
+#plot(chi_income2019)
 chi_inc <- chi_income2019["med_earn"]
-plot(chi_inc)
-
+plot(chi_inc)  ## this shows med income of all of Cook County income
+glimpse(chi_inc)
 ```
 
 
@@ -108,7 +100,7 @@ st_crs(chi_inc)
 st_crs(chibounds)
 
 # setting NAD83 as the CRS
-chibounds_CRS <- st_set_crs(chibounds, st_crs(chi_inc))
+chibounds_CRS <- st_transform(chibounds, st_crs(chi_inc))
 st_crs(chibounds_CRS)
 chib_inc <- st_intersection(chi_inc, chibounds_CRS)
 
@@ -120,63 +112,47 @@ Now I just need to do this for the other cities: (it would also be cool to devel
 
 ```{r mpls}
 
-mpls_bounds <- st_read("final_project/mpls_bounds/16cdbbfa-ad10-493c-afaf-52b61f2e76e42020329-1-180h9ap.whbo.shp")
+mpls_bounds <- st_read("city_boundaries/mpls_bounds/16cdbbfa-ad10-493c-afaf-52b61f2e76e42020329-1-180h9ap.whbo.shp")
 mpls_b <- mpls_bounds[0]
+
+mpls_inc <- mpls_income2019["med_earn"]
 plot(mpls_b)
 
-st_crs(chi_inc)
-st_crs(chibounds)
+st_crs(mpls_b)
+st_crs(mpls_inc)
 
 # setting NAD83 as the CRS
-chibounds_CRS <- st_set_crs(chibounds, st_crs(chi_inc))
-st_crs(chibounds_CRS)
-chib_inc <- st_intersection(chi_inc, chibounds_CRS)
+mpls_b_CRS <- st_transform(mpls_b, st_crs(chi_inc))
+st_crs(mpls_b_CRS)  # <- check
+mplsb_inc <- st_intersection(mpls_inc, mpls_b_CRS)
 
-plot(chib_inc)
-
-```
-
-
-```{r charleston}
-
-charbounds <- st_read("final_project/charleston_Base_Zoning/Base_Zoning.shp")
-char0 <- charbounds[0]
-glimpse(char0)
-char0dis <- aggregate(char0, by=char0$geometry, dissolve=TRUE) #by=char0$geometry
-plot(char0dis)
-
-char0dis2 <- st_union(char0dis)
-plot(char0dis2)
-
-
-plot(charbounds)
-chibounds <- chibounds[0]
-plot(chibounds[0])
-plot(chi_income2019)
-chi_inc <- chi_income2019["med_earn"]
-plot(chi_inc)
+plot(mplsb_inc)
 
 ```
 
 
+```{r sd}
 
+sd_bounds <- st_read("city_boundaries/san_diego_boundary_datasd/san_diego_boundary_datasd.shp")
+sd_b <- sd_bounds[0]
 
-Took longer than ideal to figure out what the dang variable name for the median earnings was called (the census data site is really not very well set up).
+sd_inc <- sd_income2019["med_earn"]
+plot(sd_b)
 
+st_crs(sd_b)
+st_crs(sd_inc)
 
-```{r subsetting for final df}
+# setting NAD83 as the CRS
+sd_b_CRS <- st_transform(sd_b, st_crs(sd_inc))
+st_crs(sd_b_CRS)  # <- check
+sdb_inc <- st_intersection(sd_inc, sd_b_CRS)
 
-incdf15 <- data.frame("GEOID" = h_income2015$GEOID, "medearn" = h_income2015$med_earn)
-
-incdf19 <- data.frame("GEOID" = h_income2019$GEOID, "medearn" = h_income2019$med_earn)
-
-glimpse(incdf15)
+plot(sdb_inc)
 
 ```
 
 
-
-## final data tables
+## Constructing a Final Data Table
 
 We'll conclude with 2 separate tables, one for the index for 2015, one for the index for 2019.
 
@@ -309,7 +285,8 @@ plot(Idf$IDel)
 
 ```
 
-Index done!
+
+
 
 Writing the data as a csv file:
 
