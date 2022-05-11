@@ -1,0 +1,40 @@
+---
+title: "Visualizing_Inc_Data"
+author: "Fiona Edwardson"
+date: "5/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's make sure everything went as expected in the data wrangling process:
+
+```{r pulling in chi income data}
+
+c_inc <- st_read("city_income_data/chi/chi_inc.shp")
+plot(c_inc)
+
+# success!
+
+```
+
+Nice! Let's pull in the other files:
+
+```{r pulling in mpls and sd income data}
+
+sd_inc <- st_read("city_income_data/sd/sd_inc.shp")
+plot(sd_inc)
+glimpse(sd_inc)
+
+m_inc <- st_read("city_income_data/mpls/mpls_inc.shp")
+plot(m_inc)
+
+```
+
+Oh, it looks like I never ran the line that added the "sd" city name to the data set. If it's important, I can add it later. But worth noting!
+
+
+
+
