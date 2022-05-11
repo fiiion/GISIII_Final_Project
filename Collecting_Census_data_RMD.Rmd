@@ -8,19 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
----
-title: "GISIII_census_data"
-author: "Fiona Edwardson"
-date: "5/6/2022"
-output: html_document
----
 
----
-title: "just_census_data"
-author: "Fiona Edwardson"
-date: "3/13/2022"
-output: html_document
----
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -46,154 +34,14 @@ Sys.getenv("CENSUS_API_KEY")
 readRenviron("~/.Renviron")
 ```
 
+```{r confirm you're in the GISIII_Final_Project directory}
 
-# data set 1: total population & white population
-
-```{r setting wd}
-# setting wd
-setwd("~/Documents/GISIII_files")
-
-# import libraries idk
-```
-
-```{r importing the Demographic data (pop data)}
-
-
-demog2019 <- get_acs(geography = "tract", 
-              year = 2019,
-              variables = c(tpop = "DP05_0001E", twhite = "DP05_0037E"),
-              state = "IL",
-              survey = "acs5",
-              output = "wide",
-              geometry = TRUE)
-
-view(demog2019)
-
-demog2015 <- get_acs(geography = "tract", 
-              year = 2015,
-              variables = c(tpop = "DP05_0001E", twhite = "DP05_0032E"),
-              state = "IL",
-              survey = "acs5",
-              output = "wide",
-              geometry = TRUE)
-
-view(demog2015)
-
-```
-
-DP05_0001E == total population
-DP05_0037E == total population > one race > white (column ~ 133)
-+ need GEOID
-
-## r data wrangling
-```{r subsetting only the tracts in cook county}
-
-demog19 <-
-  demog2019 %>%
-  filter(stringr::str_detect(NAME, 'Cook County') )
-
-view(demog19)
-
-
-demog15 <-
-  demog2015 %>%
-  filter(stringr::str_detect(NAME, 'Cook County') )
-
-glimpse(demog15)
+getwd()
 
 ```
 
 
-```{r subsetting: only % white and geoid}
-
-dem19 <- subset(demg19, select = c(GEOID, pwhite) )
-dem15 <- subset(demg15, select = c(GEOID, pwhite) )
-
-glimpse(dem15)
-```
-
-
-# data set 2: % poverty
-
-```{r pulling in poverty data}
-
-pov2015 <- get_acs(geography = "tract", 
-              year = 2015,
-              variables = c(tpov = "S1701_C02_001E"),
-              state = "IL",
-              county = "cook",
-              survey = "acs5",
-              output = "wide",
-              show_call = TRUE,
-              geometry = TRUE)
-
-glimpse(pov2015)
-
-plot(pov2015$tpov)
-
-summary(pov2015)
-
-pov2019 <- get_acs(geography = "tract", 
-              year = 2019,
-              variables = c(tpov = "S1701_C02_001E"),
-              state = "IL",
-              county = "Cook",
-              survey = "acs5",
-              output = "wide",
-              geometry = TRUE)
-```
-
-
-
-```{r getting tot pop as its own data set}
-
-totpop19 <- subset(demg19, select = c(GEOID, tpop), left = TRUE )
-totpop15 <- subset(demg15, select = c(GEOID, tpop), left = TRUE )
-
-df15 <- data.frame("GEOID" = totpop15$GEOID, "tpop" = totpop15$tpop)
-glimpse(df15)
-
-df19 <- data.frame("GEOID" = totpop19$GEOID, "tpop" = totpop19$tpop)
-
-```
-
-Actually, let me do the same for poverty:
-```{r pov as a data set (w/o geometry col)}
-tpov15 <- data.frame("GEOID" = pov2015$GEOID, "tpov" = pov2015$tpov)
-tpov19 <- data.frame("GEOID" = pov2019$GEOID, "tpov" = pov2019$tpov)
-
-glimpse(tpov19)
-
-```
-
-
-now merging the data:
-
-```{r merging totpop to poverty}
-
-pov15 <- left_join(df15, tpov15, by = "GEOID")
-pov19 <- left_join(df19, tpov19, by = "GEOID")
-
-glimpse(pov15)
-
-```
-
-Seems a little fishy, at first glance. However, let us soldier on. (Note: I was using the wrong variable key !)
-
-```{r making a percent pov category}
-
-pov19 <- mutate(pov19, ppov = tpov/tpop)
-pov15 <- mutate(pov15, ppov = tpov/tpop)
-glimpse(pov15)
-
-plot(pov15["ppov"])
-
-```
-
-Nice!
-
-
-# data set 3: median household income
+# data: median household income
 
 Data for all four cities
 
