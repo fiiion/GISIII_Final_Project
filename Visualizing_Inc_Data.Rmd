@@ -9,6 +9,21 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+We need some libraries for the visualizations!
+```{r loading libraries...}
+
+library(sf)
+library(raster)
+library(dplyr)
+library(spData)
+library(spDataLarge)
+library(tmap)    
+library(leaflet) 
+library(ggplot2)
+
+```
+
+
 Let's make sure everything went as expected in the data wrangling process:
 
 ```{r pulling in chi income data}
@@ -35,6 +50,51 @@ plot(m_inc)
 
 Oh, it looks like I never ran the line that added the "sd" city name to the data set. If it's important, I can add it later. But worth noting!
 
+Now I'll decide on how to format my choropleth maps. Here are the boundaries I'm thinking of:
+
+- $ == city minimum wage 
+
+chi == $15 / hr  == $31,200 per year
+mpls == $15 / hr == $31,200 per year
+sd == $ 15 / hr == $31,200 per year
+
+I didn't actually know that! Neat.
+
+- $ == can afford housing (avg 1br apt rent x 3)
+
+chi = $2,080 == monthly income of $6,240 == annual income of $74,880
+mpls = $1,621 == annual income of $58,356
+sd = $2,756 == annual income of $99,216
+
+Wow, these are drastically different values.
 
 
+- $100,000 == more than six figures
+- $1,000,000 == more than a million dollars
+
+```{r inputting the correct choropleth boundaries}
+# making a bigger boundary box to resolve title overlap issues
+### note: pulled this code from the internet! https://stackoverflow.com/questions/60892033/how-do-you-position-the-title-and-legend-in-tmap
+
+bbox_new <- st_bbox(c_inc) # current bounding box
+
+xrange <- bbox_new$xmax - bbox_new$xmin # range of x values
+yrange <- bbox_new$ymax - bbox_new$ymin # range of y values
+
+#bbox_new[1] <- bbox_new[1] - (0.25 * xrange) # xmin - left
+#bbox_new[3] <- bbox_new[3] + (0.25 * xrange) # xmax - right
+# bbox_new[2] <- bbox_new[2] - (0.25 * yrange) # ymin - bottom
+bbox_new[4] <- bbox_new[4] + (0.1 * yrange) # ymax - top
+
+bbox_new <- bbox_new %>%  
+  st_as_sfc() # turns the bbox into a sf polygon
+
+
+
+chibreaks = c(12600, 31200, 58356, 100000, 500000)
+tm_shape(c_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = chibreaks, title = expression("Median Income")) + tm_layout(bg = "grey99", legend.position = c("left", "bottom"), legend.title.size = 0.8,legend.text.size = 0.5, title = "Individual Median Income in Chicago") 
+
+#tm_fill(legend_title = expression("Indvl Median Income"))
+
+```
 
