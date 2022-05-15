@@ -93,7 +93,7 @@ bbox_new <- bbox_new %>%
 
 ## Chicago map
 chibreaks = c(12600, 31200, 74880, 100000, 500000)
-tm_shape(c_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = chibreaks, title = expression("Median Income")) + tm_layout(bg = "grey99", legend.position = c("left", "bottom"), legend.title.size = 0.8,legend.text.size = 0.5, title = "Individual Median Income in Chicago") 
+tm_shape(c_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = chibreaks, title = expression("Median Income")) + tm_layout(bg = "grey100", legend.position = c("left", "bottom"), legend.title.size = 0.8,legend.text.size = 0.5, title = "Individual Median Income in Chicago") 
 
 #tm_fill(legend_title = expression("Indvl Median Income"))
 
@@ -115,7 +115,7 @@ bbox_new <- bbox_new %>%
 
 
 mplsbreaks = c(12600, 31200, 58356, 100000, 500000)
-tm_shape(m_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = mplsbreaks, title = expression("Median Income")) + tm_layout(bg = "grey99", legend.position = c("left", "bottom"), legend.title.size = 0.8,legend.text.size = 0.5, title = "Individual Median Income in Minneapolis") 
+tm_shape(m_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = mplsbreaks, title = expression("Median Income")) + tm_layout(bg = "grey100", legend.position = c("left", "bottom"), legend.title.size = 0.8,legend.text.size = 0.5, title = "Individual Median Income in Minneapolis") 
 
 #tm_fill(legend_title = expression("Indvl Median Income"))
 
@@ -140,7 +140,7 @@ bbox_new <- bbox_new %>%
 
 
 sdbreaks = c(12600, 31200, 99216, 100000, 500000)
-tm_shape(sd_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = sdbreaks, title = expression("Median Income")) + tm_layout(bg = "grey99", legend.position = c("right", "bottom"), legend.title.size = 0.8,legend.text.size = 0.5, title = "Individual Median Income in San Diego") 
+tm_shape(sd_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = sdbreaks, title = expression("Median Income")) + tm_layout(bg = "grey100", legend.position = c("right", "bottom"), legend.title.size = 0.8,legend.text.size = 0.5, title = "Individual Median Income in San Diego") 
 
 #tm_fill(legend_title = expression("Indvl Median Income"))
 
@@ -148,3 +148,4 @@ tm_shape(sd_inc, bbox = bbox_new) + tm_polygons(col = "med_earn", breaks = sdbre
 
 ```
 
+Righto! I'm going to save these visualizations to my computer and start the process of making an ArcGIS story map.
