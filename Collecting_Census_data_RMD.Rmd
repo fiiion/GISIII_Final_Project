@@ -21,17 +21,17 @@ library(tmap)
 library(areal)
 library(leaflet)
 library(dbplyr)
-# install.packages("censusapi")
+#install.packages("censusapi")
 library(censusapi)
 ```
 
 ```{r putting in Census API key}
 
-census_api_key("d1152bd242c2f6acbb41b8fc85fa9e9aa571a196", install = TRUE, overwrite = TRUE)
+#census_api_key("MY_KEY", install = TRUE, overwrite = TRUE)
 
-Sys.getenv("CENSUS_API_KEY")
+#Sys.getenv("CENSUS_API_KEY")
 
-readRenviron("~/.Renviron")
+#readRenviron("~/.Renviron")
 ```
 
 ```{r confirm you're in the GISIII_Final_Project directory}
@@ -55,7 +55,7 @@ chi_income2019 <- get_acs(geography = "tract",
               output = "wide",
               geometry = TRUE)
 
-glimpse(chi_income2019)
+View(chi_income2019)
 
 
 mpls_income2019 <- get_acs(geography = "tract", 
@@ -90,6 +90,7 @@ chibounds <- chibounds[0]
 plot(chibounds[0])
 #plot(chi_income2019)
 chi_inc <- chi_income2019["med_earn"]
+#print(chi_inc$med_earn)
 plot(chi_inc)  ## this shows med income of all of Cook County income
 glimpse(chi_inc)
 ```
@@ -181,5 +182,17 @@ st_write(chib_inc, "city_income_data/chi/chi_inc.shp")
 
 
 ```
+
+.... Ok now I'm trying to do a basic clustering analysis with pysal, which means I think I want the data to be in .geojson formation.
+
+```{r exporting data for python}
+
+st_write(sdb_inc, "city_income_data/inc_data_geojson/sd/sd_inc.geojson")
+st_write(mplsb_inc, "city_income_data/inc_data_geojson/mpls/mpls_inc.geojson")
+st_write(chib_inc, "city_income_data/inc_data_geojson/chi/chi_inc.geojson")
+
+```
+
+Probably would have been a good idea to just use geojson files all along, but it's ok. (Maybe I would even be able to do a data package with the geojson files?)
 
 
